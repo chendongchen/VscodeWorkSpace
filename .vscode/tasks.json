@@ -1,47 +1,50 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "shell",
-			"label": "task g++",
-			"command": "C:/msys64/mingw64/bin/g++.exe",
-			"args": [
-				"-g",
-				"${file}",
-				"-o",
-				"${fileDirname}\\${fileBasenameNoExtension}.exe",
-				"-I",
-				"D:\\VscodeWorkSpaace",
-				"-std=c++17"
-			],
-			"options": {
-				"cwd": "C:/msys64/mingw64/bin"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build"
-		},
-		{
-			"type": "shell",
-			"label": "task gcc",
-			"command": "C:/msys64/mingw64/bin/gcc.exe",
-			"args": [
-				"-g",
-				"${file}",
-				"-o",
-				"${fileDirname}\\${fileBasenameNoExtension}.exe",
-				"-I",
-				"D:\\VscodeWorkSpaace",
-				"-std=c17"
-			],
-			"options": {
-				"cwd": "C:/msys64/mingw64/bin"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build"
-		},
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            //这里是在配置C++
+            "type": "shell",                           //这里要更改成Shell 
+            "label": "task g++",                       //这里的命名要与launch.json 中的最后一步：task name一致
+            "command": "C:/msys64/mingw64/bin/g++.exe",//检查
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-I",                   //这里可能是需要添加的地方。
+                "D:\\VscodeWorkSpaace", //这里可能是需要添加的地方。
+                "-std=c++17"            //这里可能是需要添加的地方。
+            ],
+            "options": {
+                "cwd": "C:/msys64/mingw64/bin"        //检查
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        
+        {
+            //这里是在配置C
+            "type": "shell",
+            "label": "task gcc",
+            "command": "C:/msys64/mingw64/bin/gcc.exe",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-I",
+                "D:\\VscodeWorkSpaace",
+                "-std=c17"
+            ],
+            "options": {
+                "cwd": "C:/msys64/mingw64/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+    ]
 }

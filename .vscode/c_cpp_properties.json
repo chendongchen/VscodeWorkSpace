@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "G++",
+            "name": "G++", //这里是第一次添加C++编译时命名
             "includePath": [
                 "${workspaceFolder}/**"
             ],
@@ -11,13 +11,13 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.19041.0",
-            "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
+            "compilerPath": "C:/msys64/mingw64/bin/g++.exe",//检查这里
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64"
         },
         {
-            "name": "GCC",
+            "name": "GCC",//这是C语言standard   
             "includePath": [
                 "${workspaceFolder}/**"
             ],
@@ -27,7 +27,7 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.19041.0",
-            "compilerPath": "C:/msys64/mingw64/bin/gcc.exe",
+            "compilerPath": "C:/msys64/mingw64/bin/gcc.exe",//检查
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-x64"

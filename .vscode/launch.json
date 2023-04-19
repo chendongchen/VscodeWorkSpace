@@ -2,10 +2,14 @@
     // 使用 IntelliSense 了解相关属性。 
     // 悬停以查看现有属性的描述。
     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+
+    //请不要使用复制，而是进行比较。
     "version": "0.2.0",
     "configurations": [
+
+    
         {
-            "name": "(gdb) G++",
+            "name": "(gdb) G++", //这里不要使用默认，最好是根据使用C++，命名（gdb) G++
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/${fileBasenameNoExtension}.exe",
@@ -15,7 +19,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
+            "miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",//请检查一下这里。
             "setupCommands": [
                 {
                     "description": "为 gdb 启用整齐打印",
@@ -28,8 +32,10 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "task g++"
+            "preLaunchTask": "task g++" //这句话非常重要，意味着你不必每次执行生成任务，再调试。
         },
+
+        //我同样设置了C语言的启动，
         {
             "name": "(gdb) 启动GCC C",
             "type": "cppdbg",
@@ -54,7 +60,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "task gcc"
+            "preLaunchTask": "task gcc" //这句话非常重要，意着你不必每次执行生成任务
         }
     ]
 }
