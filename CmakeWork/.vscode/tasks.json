@@ -11,7 +11,7 @@
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-I",
-                "D:\\VscodeWorkSpaace",
+                "D:\\VscodeWorkSpaace\\CmakeWork",
                 "-std=c++17"
             ],
             "options": {
@@ -32,7 +32,7 @@
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-I",
-                "D:\\VscodeWorkSpaace",
+                "D:\\VscodeWorkSpaace\\CmakeWork",
                 "-std=c17"
             ],
             "options": {
@@ -43,5 +43,16 @@
             ],
             "group": "build"
         },
+        {
+            "type": "cmake",
+            "label": "CMake: build",
+            "command": "build",
+            "targets": [
+                "all"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "CMake template build task"
+        }
     ]
 }
