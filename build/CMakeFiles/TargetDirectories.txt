@@ -1,0 +1,3 @@
+D:/VscodeWorkSpace/build/CMakeFiles/ExampleProject.dir
+D:/VscodeWorkSpace/build/CMakeFiles/edit_cache.dir
+D:/VscodeWorkSpace/build/CMakeFiles/rebuild_cache.dir
