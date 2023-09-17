@@ -1,0 +1,8 @@
+[
+{
+  "directory": "D:/VscodeWorkSpace/New/build",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe   -g -o CMakeFiles\\NewProject.dir\\main.cpp.obj -c D:\\VscodeWorkSpace\\New\\main.cpp",
+  "file": "D:/VscodeWorkSpace/New/main.cpp",
+  "output": "CMakeFiles/NewProject.dir/main.cpp.obj"
+}
+]
