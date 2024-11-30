@@ -6,66 +6,127 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.tri import Triangulation
-from matplotlib.collections import PolyCollection
-
-
-# 用户定义节点和单元
-nodes = [
-    (0, 1),
-    (1, 1),
-    (0, 0),
-    (1, 0),
-    (2, 0)
-]
-
-elements = [
-    [0, 2, 3],  # 第一个单元 注意请按逆时针排列节点坐标，节点从0开始
-    [1, 3, 4],  # 第二个单元
-    [0, 3, 1]   # 第三个单元
-]
 
 E = 210e9  # 弹性模量，单位 Pa
 nu = 0.2  # 泊松比
 t = 0.01  # 厚度，单位 m
 q = 1e6  # 载荷kN/m
 f = t * q 
-# 提取自由节点 0 和 1 有关的部分
-dof_indices = [0, 1, 2, 3]  # 节点 0 和 1 的自由度索引(2n-2,2n-1)
+size_nodes_finit = 2 # 节点密度 单位1/m
 
-# 定义外力向量
-F = np.array([f, 0, 0, 0])  # 假设节点 0 和 1 的外力分别为(F_x,F_y)
+# 用户定义节点和单元
+def generate_nodes_and_elements_size(num_nodes_size):
+    """
+    生成给定节点数量的网格的节点和单元信息。
 
+    参数:
+    num_nodes_size (int): 网格中节点的数量。
 
-# # 示例
-# nodes = [
-#     (0, 1),
-#     (1, 1),
-#     (0, 0),
-#     (1, 0),
-#     (2, 0)
-# ]
+    返回:
+    tuple: 包含两个列表，第一个列表是节点坐标，第二个列表是单元节点索引。
+    """
+    num_rows = num_nodes_size
+    num_nodes_per_row = num_nodes_size
+    nodes = []
+    elements = []
+    
+    # 生成节点
+    for row in range(num_rows):
+        for col in range(num_nodes_per_row+row):
+            nodes.append((col/(num_nodes_size-1), 1-row/(num_nodes_size-1)))
+    
+    # 生成单元
+    nodes_index = 0
+    for row in range(num_rows - 1):
+        if row%2 == 0:
+            for col in range(num_nodes_per_row +row - 1):
+                elements.append([nodes_index//2, nodes_index//2 + num_nodes_per_row +row, nodes_index//2 + num_nodes_per_row +row + 1])
+                elements.append([nodes_index//2, nodes_index//2 + num_nodes_per_row +row + 1, nodes_index//2 + 1])
+                nodes_index = nodes_index + 2
+            elements.append([nodes_index//2, nodes_index//2 + num_nodes_per_row +row, nodes_index//2 + num_nodes_per_row +row + 1])
+            nodes_index = nodes_index + 1
+        else:
+            for col in range(num_nodes_per_row +row - 1):
+                nodes_index = nodes_index + 1
+                elements.append([nodes_index//2, nodes_index//2 + num_nodes_per_row +row, nodes_index//2 + num_nodes_per_row +row + 1])
+                elements.append([nodes_index//2, nodes_index//2 + num_nodes_per_row +row + 1, nodes_index//2 + 1])
+                nodes_index = nodes_index + 1
+            nodes_index = nodes_index + 1    
+            elements.append([nodes_index//2, nodes_index//2 + num_nodes_per_row +row, nodes_index//2 + num_nodes_per_row +row + 1])
+            nodes_index = nodes_index + 2
+            
+    
+    return nodes, elements
 
-# elements = [
-#     [0, 2, 3],  # 第一个单元
-#     [1, 3, 4],  # 第二个单元
-#     [0, 3, 1]   # 第三个单元
-# ]
+def get_indices_of_free_dofs(nodes_zies):
+    """
+    计算并返回所有自由节点的自由度（DOF）索引列表。
+    
+    该函数假定网格为正方形网格，且底边节点固定。每个节点有两个自由度（例如，x和y方向的位移）。
+    
+    参数:
+    nodes_zies (int): 每边的节点数。
+    
+    返回:
+    list: 自由节点的自由度索引列表。
+    """
 
-# E = 1  # 弹性模量，单位 Pa
-# nu = 0.2  # 泊松比
-# t = 1  # 厚度，单位 m
+    num_nodes_per_row = nodes_zies
+    num_rows = nodes_zies
+    dof_indices = []
+        # 生成节点
+    i = 0
+    for row in range(num_rows-1):   #底边固定
+        for col in range(num_nodes_per_row+row):
+            dof_indices.append(i*2)
+            dof_indices.append(i*2+1)
+            i = i + 1
 
-# # 提取与节点 0 和 1 有关的部分
-# dof_indices = [0, 1, 2, 3]  # 节点 0 和 1 的自由度索引
+    return dof_indices
 
-# # 定义外力向量
-# F = np.array([1, 2, 3, 4])  # 假设节点 0 和 1 的外力分别为 (1, 2) 和 (3, 4)
+def show_plots(nodes, elements) :
+    """
+    绘制并展示三角网格图形。
 
+    参数:
+    nodes: 节点坐标列表，每个节点由一对X和Y坐标组成。
+    elements: 元素列表，每个元素由三个节点索引组成，表示一个三角形。
+
+    返回值:
+    无返回值，但会保存并展示三角网格图形。
+    """
+    # 绘制三角网格
+    x, y = zip(*nodes)
+    triangles = elements
+
+    fig, ax = plt.subplots()
+    ax.triplot(x, y, triangles, 'bo-', lw=1)
+    ax.set_title('Triangular Grid')
+    plt.xlabel('X coordinate')
+    plt.ylabel('Y coordinate')
+    plt.grid(True)
+    # 保存图像
+    plt.savefig('mesh_grid'+str(size_nodes_finit)+'.png')
+    plt.show()
 
 def calculate_area(x1, y1, x2, y2, x3, y3):
     return 0.5 * abs(x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))
 
 def calculate_stiffness_matrix(x1, y1, x2, y2, x3, y3, E, nu, t):
+    """
+    计算刚度矩阵 K。
+    
+    参数:
+    x1, y1, x2, y2, x3, y3 -- 三角形节点坐标
+    E -- 杨氏模量
+    nu -- 泊松比
+    t -- 板厚
+    
+    返回:
+    K -- 刚度矩阵
+    B -- 形状函数导数矩阵
+    D -- 弹性矩阵
+    """
     # 计算面积
     A = calculate_area(x1, y1, x2, y2, x3, y3)
     
@@ -92,6 +153,19 @@ def calculate_stiffness_matrix(x1, y1, x2, y2, x3, y3, E, nu, t):
     return  K, B, D  # 返回 K, B, D
 
 def assemble_global_stiffness_matrix(elements, nodes, E, nu, t):
+    """
+    组装全局刚度矩阵
+
+    参数:
+    elements: 元素连接表，每个元素由节点索引组成
+    nodes: 节点坐标表，每个节点由其坐标组成
+    E: 杨氏模量
+    nu: 泊松比
+    t: 板的厚度
+
+    返回:
+    global_K: 全局刚度矩阵
+    """
     num_nodes = len(nodes)
     num_dofs_per_node = 2  # 每个节点有两个自由度
     global_K = np.zeros((num_nodes * num_dofs_per_node, num_nodes * num_dofs_per_node))
@@ -115,6 +189,10 @@ def assemble_global_stiffness_matrix(elements, nodes, E, nu, t):
     
     return global_K
 
+nodes, elements = generate_nodes_and_elements_size(size_nodes_finit)
+show_plots(nodes, elements)
+dof_indices = get_indices_of_free_dofs(size_nodes_finit)
+F = np.array([f] + [0] * (len(dof_indices) - 1))
 
 global_K = assemble_global_stiffness_matrix(elements, nodes, E, nu, t)
 # print(global_K)    # 打印刚度矩阵
@@ -122,9 +200,9 @@ global_K = assemble_global_stiffness_matrix(elements, nodes, E, nu, t)
 
 # 将刚度矩阵保存为 Excel 文件
 df = pd.DataFrame(global_K)
-df.to_excel('global_stiffness_matrix.xlsx', index=False, header=False)
+df.to_excel('global_stiffness_matrix'+str(size_nodes_finit)+'.xlsx', index=False, header=False)
 
-print("刚度矩阵已保存到 global_stiffness_matrix.xlsx")
+print("刚度矩阵已保存到 global_stiffness_matrix"+str(size_nodes_finit)+".xlsx")
 
 
 reduced_K = global_K[np.ix_(dof_indices, dof_indices)]
@@ -136,7 +214,7 @@ print(reduced_K)
 # 求解线性方程组
 u = np.linalg.solve(reduced_K, F)
 
-print("\n节点 0 和 1 的位移:")
+print("\n节点  的位移:")
 print(u)
 
 # 构建整体节点位移向量
@@ -206,8 +284,9 @@ ax.set_aspect('equal')
 ax.set_xlim(-0.5, 2.5)
 ax.set_ylim(-0.5, 1.5)
 ax.set_title('x 方向位移云图')
-for i, (x, y) in enumerate(nodes):
-    ax.text(x, y, f'{u_global[i*2]:.5g}', fontsize=8, ha='center')
+# #   是否去掉标签值
+# for i, (x, y) in enumerate(nodes):
+#     ax.text(x, y, f'{u_global[i*2]:.5g}', fontsize=8, ha='center')
 fig.colorbar(cf, ax=ax)
 
 # 绘制 y 方向位移云图
@@ -218,8 +297,9 @@ ax.set_aspect('equal')
 ax.set_xlim(-0.5, 2.5)
 ax.set_ylim(-0.5, 1.5)
 ax.set_title('y 方向位移云图')
-for i, (x, y) in enumerate(nodes):
-    ax.text(x, y, f'{u_global[i*2+1]:.5g}', fontsize=8, ha='center')
+#  #   是否去掉标签值
+# for i, (x, y) in enumerate(nodes):
+#     ax.text(x, y, f'{u_global[i*2+1]:.5g}', fontsize=8, ha='center')
 fig.colorbar(cf, ax=ax)
 
 # 绘制 σx 应力云图
@@ -230,8 +310,9 @@ ax.set_aspect('equal')
 ax.set_xlim(-0.5, 2.5)
 ax.set_ylim(-0.5, 1.5)
 ax.set_title('σx 应力云图')
-for i, (x, y) in enumerate(nodes):
-    ax.text(x, y, f'{node_stress_avg[i][0]:.5g}', fontsize=8, ha='center')
+# #   是否去掉标签值
+# for i, (x, y) in enumerate(nodes):
+#     ax.text(x, y, f'{node_stress_avg[i][0]:.5g}', fontsize=8, ha='center')
 fig.colorbar(cf, ax=ax)
 
 # 绘制 σy 应力云图
@@ -242,8 +323,9 @@ ax.set_aspect('equal')
 ax.set_xlim(-0.5, 2.5)
 ax.set_ylim(-0.5, 1.5)
 ax.set_title('σy 应力云图')
-for i, (x, y) in enumerate(nodes):
-    ax.text(x, y, f'{node_stress_avg[i][1]:.5g}', fontsize=8, ha='center')
+# #   是否去掉标签值
+# for i, (x, y) in enumerate(nodes):
+#     ax.text(x, y, f'{node_stress_avg[i][1]:.5g}', fontsize=8, ha='center')
 fig.colorbar(cf, ax=ax)
 
 # 绘制 τxy 剪切应力云图
@@ -254,8 +336,9 @@ ax.set_aspect('equal')
 ax.set_xlim(-0.5, 2.5)
 ax.set_ylim(-0.5, 1.5)
 ax.set_title('τxy 剪切应力云图')
-for i, (x, y) in enumerate(nodes):
-    ax.text(x, y, f'{node_stress_avg[i][2]:.5g}', fontsize=8, ha='center')
+# #   是否去掉标签值
+# for i, (x, y) in enumerate(nodes):
+#     ax.text(x, y, f'{node_stress_avg[i][2]:.5g}', fontsize=8, ha='center')
 fig.colorbar(cf, ax=ax)
 
 # 设置字体
@@ -264,7 +347,7 @@ plt.rcParams['axes.unicode_minus'] = False  # 正常显示负号
 plt.tight_layout()
 
 # 保存图像
-plt.savefig('cloud_plots.png')
+plt.savefig('cloud_plots'+str(size_nodes_finit)+'.png')
 
 
 # 非阻塞显示图像
