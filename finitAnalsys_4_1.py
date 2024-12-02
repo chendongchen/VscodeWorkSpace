@@ -12,7 +12,7 @@ nu = 0.2  # 泊松比
 t = 0.01  # 厚度，单位 m
 q = 1e6  # 载荷kN/m
 f = t * q 
-size_nodes_finit = 2 # 节点密度 单位1/m
+size_nodes_finit = 20 # 节点密度 单位1/m
 
 # 用户定义节点和单元
 def generate_nodes_and_elements_size(num_nodes_size):
@@ -189,6 +189,90 @@ def assemble_global_stiffness_matrix(elements, nodes, E, nu, t):
     
     return global_K
 
+def plot_results(nodes, elements, u_global, node_stress_avg, size_nodes_finit):
+    """
+    绘制并保存位移和应力云图。
+
+    参数:
+    nodes: 节点坐标列表，每个节点由一对X和Y坐标组成。
+    elements: 元素列表，每个元素由三个节点索引组成，表示一个三角形。
+    u_global: 整体节点位移向量。
+    node_stress_avg: 每个节点的平均应力。
+    size_nodes_finit: 节点密度。
+
+    返回值:
+    无返回值，但会保存并展示云图。
+    """
+    # 创建三角形网格
+    tri = Triangulation([node[0] for node in nodes], [node[1] for node in nodes], triangles=elements)
+
+    # 绘制云图
+    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+    axes = axes.flatten()
+
+    # 绘制 x 方向位移云图
+    ax = axes[0]
+    cmap = 'viridis'
+    vmin, vmax = min(u_global[::2]), max(u_global[::2])
+    cf = ax.tripcolor(tri, u_global[::2], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
+    ax.set_aspect('equal')
+    ax.set_xlim(-0.5, 2.5)
+    ax.set_ylim(-0.5, 1.5)
+    ax.set_title('x 方向位移云图')
+    fig.colorbar(cf, ax=ax)
+
+    # 绘制 y 方向位移云图
+    ax = axes[1]
+    vmin, vmax = min(u_global[1::2]), max(u_global[1::2])
+    cf = ax.tripcolor(tri, u_global[1::2], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
+    ax.set_aspect('equal')
+    ax.set_xlim(-0.5, 2.5)
+    ax.set_ylim(-0.5, 1.5)
+    ax.set_title('y 方向位移云图')
+    fig.colorbar(cf, ax=ax)
+
+    # 绘制 σx 应力云图
+    ax = axes[2]
+    vmin, vmax = min(node_stress_avg[:, 0]), max(node_stress_avg[:, 0])
+    cf = ax.tripcolor(tri, node_stress_avg[:, 0], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
+    ax.set_aspect('equal')
+    ax.set_xlim(-0.5, 2.5)
+    ax.set_ylim(-0.5, 1.5)
+    ax.set_title('σx 应力云图')
+    fig.colorbar(cf, ax=ax)
+
+    # 绘制 σy 应力云图
+    ax = axes[3]
+    vmin, vmax = min(node_stress_avg[:, 1]), max(node_stress_avg[:, 1])
+    cf = ax.tripcolor(tri, node_stress_avg[:, 1], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
+    ax.set_aspect('equal')
+    ax.set_xlim(-0.5, 2.5)
+    ax.set_ylim(-0.5, 1.5)
+    ax.set_title('σy 应力云图')
+    fig.colorbar(cf, ax=ax)
+
+    # 绘制 τxy 剪切应力云图
+    ax = axes[4]
+    vmin, vmax = min(node_stress_avg[:, 2]), max(node_stress_avg[:, 2])
+    cf = ax.tripcolor(tri, node_stress_avg[:, 2], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
+    ax.set_aspect('equal')
+    ax.set_xlim(-0.5, 2.5)
+    ax.set_ylim(-0.5, 1.5)
+    ax.set_title('τxy 剪切应力云图')
+    fig.colorbar(cf, ax=ax)
+
+    # 设置字体
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 使用黑体
+    plt.rcParams['axes.unicode_minus'] = False  # 正常显示负号
+    plt.tight_layout()
+
+    # 保存图像
+    plt.savefig('cloud_plots' + str(size_nodes_finit) + '.png')
+
+    # 非阻塞显示图像
+    plt.show()
+
+# 主程序
 nodes, elements = generate_nodes_and_elements_size(size_nodes_finit)
 show_plots(nodes, elements)
 dof_indices = get_indices_of_free_dofs(size_nodes_finit)
@@ -261,97 +345,30 @@ for i, element in enumerate(elements):
 
 node_stress_avg = node_stress_sum / node_stress_count[:, None]
 
+# 创建一个包含节点坐标、位移、应力和力的DataFrame
+data = {
+    'Node Index': list(range(len(nodes))),
+    'X Coordinate': [node[0] for node in nodes],
+    'Y Coordinate': [node[1] for node in nodes],
+    'Displacement X': u_global[::2],
+    'Displacement Y': u_global[1::2],
+    'Stress X': node_stress_avg[:, 0],
+    'Stress Y': node_stress_avg[:, 1],
+    'Shear Stress XY': node_stress_avg[:, 2],
+    'Force X': F_total[::2],
+    'Force Y': F_total[1::2]
+}
+
+df_combined = pd.DataFrame(data)
+
+# 将DataFrame保存到Excel文件中
+df_combined.to_excel('combined_results'+str(size_nodes_finit)+'.xlsx', index=False)
+
+print(f"综合结果已保存到 combined_results{size_nodes_finit}.xlsx")
+
 # 绘制云图
-fig, axes = plt.subplots(2, 3, figsize=(18, 10))
-axes = axes.flatten()
-
-# 创建多边形集合
-polygons = []
-for element in elements:
-    node_indices = element
-    polygon = [nodes[node_index] for node_index in node_indices]
-    polygons.append(polygon)
-
-# 创建三角形网格
-tri = Triangulation([node[0] for node in nodes], [node[1] for node in nodes], triangles=elements)
-
-# 绘制 x 方向位移云图
-ax = axes[0]
-cmap = 'viridis'
-vmin, vmax = min(u_global[::2]), max(u_global[::2])
-cf = ax.tripcolor(tri, u_global[::2], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
-ax.set_aspect('equal')
-ax.set_xlim(-0.5, 2.5)
-ax.set_ylim(-0.5, 1.5)
-ax.set_title('x 方向位移云图')
-# #   是否去掉标签值
-# for i, (x, y) in enumerate(nodes):
-#     ax.text(x, y, f'{u_global[i*2]:.5g}', fontsize=8, ha='center')
-fig.colorbar(cf, ax=ax)
-
-# 绘制 y 方向位移云图
-ax = axes[1]
-vmin, vmax = min(u_global[1::2]), max(u_global[1::2])
-cf = ax.tripcolor(tri, u_global[1::2], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
-ax.set_aspect('equal')
-ax.set_xlim(-0.5, 2.5)
-ax.set_ylim(-0.5, 1.5)
-ax.set_title('y 方向位移云图')
-#  #   是否去掉标签值
-# for i, (x, y) in enumerate(nodes):
-#     ax.text(x, y, f'{u_global[i*2+1]:.5g}', fontsize=8, ha='center')
-fig.colorbar(cf, ax=ax)
-
-# 绘制 σx 应力云图
-ax = axes[2]
-vmin, vmax = min(node_stress_avg[:, 0]), max(node_stress_avg[:, 0])
-cf = ax.tripcolor(tri, node_stress_avg[:, 0], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
-ax.set_aspect('equal')
-ax.set_xlim(-0.5, 2.5)
-ax.set_ylim(-0.5, 1.5)
-ax.set_title('σx 应力云图')
-# #   是否去掉标签值
-# for i, (x, y) in enumerate(nodes):
-#     ax.text(x, y, f'{node_stress_avg[i][0]:.5g}', fontsize=8, ha='center')
-fig.colorbar(cf, ax=ax)
-
-# 绘制 σy 应力云图
-ax = axes[3]
-vmin, vmax = min(node_stress_avg[:, 1]), max(node_stress_avg[:, 1])
-cf = ax.tripcolor(tri, node_stress_avg[:, 1], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
-ax.set_aspect('equal')
-ax.set_xlim(-0.5, 2.5)
-ax.set_ylim(-0.5, 1.5)
-ax.set_title('σy 应力云图')
-# #   是否去掉标签值
-# for i, (x, y) in enumerate(nodes):
-#     ax.text(x, y, f'{node_stress_avg[i][1]:.5g}', fontsize=8, ha='center')
-fig.colorbar(cf, ax=ax)
-
-# 绘制 τxy 剪切应力云图
-ax = axes[4]
-vmin, vmax = min(node_stress_avg[:, 2]), max(node_stress_avg[:, 2])
-cf = ax.tripcolor(tri, node_stress_avg[:, 2], shading='gouraud', cmap=cmap, vmin=vmin, vmax=vmax)
-ax.set_aspect('equal')
-ax.set_xlim(-0.5, 2.5)
-ax.set_ylim(-0.5, 1.5)
-ax.set_title('τxy 剪切应力云图')
-# #   是否去掉标签值
-# for i, (x, y) in enumerate(nodes):
-#     ax.text(x, y, f'{node_stress_avg[i][2]:.5g}', fontsize=8, ha='center')
-fig.colorbar(cf, ax=ax)
-
-# 设置字体
-plt.rcParams['font.sans-serif'] = ['SimHei']  # 使用黑体
-plt.rcParams['axes.unicode_minus'] = False  # 正常显示负号
-plt.tight_layout()
-
-# 保存图像
-plt.savefig('cloud_plots'+str(size_nodes_finit)+'.png')
-
-
-# 非阻塞显示图像
-plt.show()
+# 调用绘图函数
+plot_results(nodes, elements, u_global, node_stress_avg, size_nodes_finit)
 
 
 
