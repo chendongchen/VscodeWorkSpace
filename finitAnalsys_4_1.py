@@ -12,7 +12,7 @@ nu = 0.2  # 泊松比
 t = 0.01  # 厚度，单位 m
 q = 1e6  # 载荷kN/m
 f = t * q 
-size_nodes_finit = 20 # 节点密度 单位1/m
+size_nodes_finit = 100 # 节点密度 单位1/m
 
 # 用户定义节点和单元
 def generate_nodes_and_elements_size(num_nodes_size):
@@ -100,7 +100,7 @@ def show_plots(nodes, elements) :
     triangles = elements
 
     fig, ax = plt.subplots()
-    ax.triplot(x, y, triangles, 'bo-', lw=1)
+    ax.triplot(x, y, triangles, 'b-', lw=1)
     ax.set_title('Triangular Grid')
     plt.xlabel('X coordinate')
     plt.ylabel('Y coordinate')
@@ -282,24 +282,24 @@ global_K = assemble_global_stiffness_matrix(elements, nodes, E, nu, t)
 # print(global_K)    # 打印刚度矩阵
 
 
-# 将刚度矩阵保存为 Excel 文件
-df = pd.DataFrame(global_K)
-df.to_excel('global_stiffness_matrix'+str(size_nodes_finit)+'.xlsx', index=False, header=False)
+# # 将刚度矩阵保存为 Excel 文件
+# df = pd.DataFrame(global_K)
+# df.to_excel('global_stiffness_matrix'+str(size_nodes_finit)+'.xlsx', index=False, header=False)
 
-print("刚度矩阵已保存到 global_stiffness_matrix"+str(size_nodes_finit)+".xlsx")
+# print("刚度矩阵已保存到 global_stiffness_matrix"+str(size_nodes_finit)+".xlsx")
 
 
 reduced_K = global_K[np.ix_(dof_indices, dof_indices)]
 
-print("\n与节点 0 和 1 有关的刚度矩阵:")
-print(reduced_K)
+# print("\n与节点 0 和 1 有关的刚度矩阵:")
+# print(reduced_K)
 
 
 # 求解线性方程组
 u = np.linalg.solve(reduced_K, F)
 
-print("\n节点  的位移:")
-print(u)
+# print("\n节点  的位移:")
+# print(u)
 
 # 构建整体节点位移向量
 num_nodes = len(nodes)
