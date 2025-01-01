@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple HTML Example</title>
+    <style>
+        /* CSS 样式 */
+        body {
+            background: linear-gradient(to right, #c59286, #64cc10); /* 背景彩色渐变 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .styled-input {
+            width: 300px;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+    </style>
+    <script>
+        function searchBaidu() {
+            var query = document.getElementById('search-input').value;
+            var url = 'https://www.baidu.com/s?wd=' + encodeURIComponent(query);
+            window.location.href = url;
+        }
+    </script>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>This is a simple HTML example.</p>
+    <div>
+        <h1>Introduce</h1>
+    </div>
+    <!-- 添加输入框和按钮 -->
+    <input type="text" id="search-input" class="styled-input" placeholder="Enter text here">
+    <button onclick="searchBaidu()">Search</button>
+</body>
+</html>
