@@ -1,37 +1,28 @@
-import numpy as np
-import matplotlib.pyplot as plt
+import os
+import codecs
 
-print('hello')
+def convert_encoding(root_dir, source_encoding='gb18030', target_encoding='utf-8'):
+    for root, dirs, files in os.walk(root_dir):
+        for file in files:
+            if file.endswith('.m'):
+                file_path = os.path.join(root, file)
+                # 备份原文件（后缀 .bak）
+                backup_path = file_path + '.bak'
+                os.rename(file_path, backup_path)
+                try:
+                    # 读取 GB18030 编码内容
+                    with codecs.open(backup_path, 'r', encoding=source_encoding) as f:
+                        content = f.read()
+                    # 写入 UTF-8 编码
+                    with codecs.open(file_path, 'w', encoding=target_encoding) as f:
+                        f.write(content)
+                    print(f"成功转换：{file_path}")
+                except Exception as e:
+                    print(f"转换失败：{file_path}，错误：{str(e)}")
+                    # 恢复备份文件
+                    os.rename(backup_path, file_path)
 
-# 生成随机数组
-random_data = np.random.normal(loc=0, scale=1, size=1000)
-short_random_data = random_data
-print(short_random_data)
-
-# 生成 x 轴数据
-x_line = [1] * 1000
-print(x_line)
-
-# 排序随机数据
-sorted_data = np.sort(short_random_data)
-print(sorted_data)
-
-# 创建图表
-plt.figure(figsize=(12, 6))
-
-# 子图 1: 原始数据直方图
-plt.subplot(1, 2, 1)
-plt.bar(random_data, x_line, width=0.005, color='blue')
-plt.title('Original Data')
-plt.xlabel('Value')
-plt.ylabel('Frequency')
-
-# 子图 2: 排序后数据直方图
-plt.subplot(1, 2, 2)
-plt.bar(sorted_data, x_line, width=0.005, color='blue')
-plt.title('Sorted Data')
-plt.xlabel('Value')
-plt.ylabel('Frequency')
-
-plt.tight_layout()
-plt.show()
+if __name__ == "__main__":
+    # 指定固定根目录（替换为你的实际路径）
+    root_directory = r"C:\Users\32429\Desktop\计算岩土力学\3Dcode\code"
+    convert_encoding(root_directory)
