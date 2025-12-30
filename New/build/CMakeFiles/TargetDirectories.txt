@@ -1,3 +1,0 @@
-D:/VscodeWorkSpace/New/build/CMakeFiles/NewProject.dir
-D:/VscodeWorkSpace/New/build/CMakeFiles/edit_cache.dir
-D:/VscodeWorkSpace/New/build/CMakeFiles/rebuild_cache.dir
